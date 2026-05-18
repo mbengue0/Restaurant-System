@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Kitchen')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-4">Kitchen Queue</h1>
+
+    <div th:if="${#lists.isEmpty(orders)}" class="alert alert-info">
+        No active orders.
+    </div>
+
+    <div class="row g-3">
+        <div th:each="order : ${orders}" class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="badge"
+                          th:classappend="${order.state.name() == 'PLACED' ? 'bg-warning text-dark'
+                              : (order.state.name() == 'IN_PREPARATION' ? 'bg-info text-dark' : 'bg-success')}"
+                          th:text="${order.state}">STATE</span>
+                    <small class="text-muted"
+                           th:text="${#temporals.format(order.placedAt, 'HH:mm')}">12:34</small>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li th:each="item : ${order.items}" class="list-group-item d-flex justify-content-between">
+                        <span th:text="${itemNames.get(item.menuItemId)}">item</span>
+                        <span class="badge bg-secondary" th:text="${'x' + item.quantity}">x1</span>
+                    </li>
+                </ul>
+                <div class="card-body">
+                    <form th:if="${order.state.name() == 'PLACED'}"
+                          th:action="@{/kitchen/{id}/start(id=${order.id.value})}" method="post">
+                        <button class="btn btn-primary btn-sm" type="submit">Start Preparation</button>
+                    </form>
+                    <form th:if="${order.state.name() == 'IN_PREPARATION'}"
+                          th:action="@{/kitchen/{id}/ready(id=${order.id.value})}" method="post">
+                        <button class="btn btn-success btn-sm" type="submit">Mark Ready</button>
+                    </form>
+                    <span th:if="${order.state.name() == 'READY'}"
+                          class="text-muted small">Awaiting waiter…</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

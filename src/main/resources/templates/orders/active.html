@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Active Orders')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-4">Active Orders</h1>
+
+    <div th:if="${#lists.isEmpty(orders)}" class="alert alert-info">
+        No active orders.
+    </div>
+
+    <table th:unless="${#lists.isEmpty(orders)}" class="table align-middle">
+        <thead>
+            <tr>
+                <th>Table</th>
+                <th>State</th>
+                <th>Items</th>
+                <th>Placed</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="order : ${orders}">
+                <td>
+                    <th:block th:with="t=${tables.get(order.tableId)}">
+                        <span th:if="${t != null}"
+                              th:text="${'Table (cap ' + t.capacity + ') #' + #strings.substring(order.tableId.value, 0, 8)}">Table</span>
+                        <span th:if="${t == null}"
+                              th:text="${'#' + #strings.substring(order.tableId.value, 0, 8)}">id</span>
+                    </th:block>
+                </td>
+                <td>
+                    <span class="badge"
+                          th:classappend="${order.state.name() == 'PLACED' ? 'bg-secondary'
+                              : (order.state.name() == 'IN_PREPARATION' ? 'bg-info text-dark'
+                              : (order.state.name() == 'READY' ? 'bg-success'
+                              : 'bg-primary'))}"
+                          th:text="${order.state}">STATE</span>
+                </td>
+                <td th:text="${#lists.size(order.items)}">0</td>
+                <td>
+                    <small class="text-muted"
+                           th:text="${#temporals.format(order.placedAt, 'HH:mm')}">12:34</small>
+                </td>
+                <td>
+                    <form th:if="${order.state.name() == 'READY'}"
+                          th:action="@{/orders/{id}/serve(id=${order.id.value})}" method="post"
+                          class="d-inline">
+                        <button class="btn btn-success btn-sm" type="submit">Mark Served</button>
+                    </form>
+                    <a th:if="${order.state.name() == 'PLACED' or order.state.name() == 'SERVED'}"
+                       th:href="@{/orders/{id}/edit(id=${order.id.value})}"
+                       class="btn btn-outline-secondary btn-sm">Open</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

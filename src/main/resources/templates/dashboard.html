@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-4">Dashboard</h1>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <a th:href="@{/tables}" class="card text-decoration-none h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Tables</h5>
+                    <p class="card-text text-muted">Seat customers, view orders.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a th:href="@{/kitchen}" class="card text-decoration-none h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Kitchen</h5>
+                    <p class="card-text text-muted">Submitted orders queue.</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 disabled-card">
+            <div class="card h-100 text-muted">
+                <div class="card-body">
+                    <h5 class="card-title">Audit Log</h5>
+                    <p class="card-text">(coming soon)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

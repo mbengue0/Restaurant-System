@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Bill Preview')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-3">Bill Preview</h1>
+    <p class="text-muted small">
+        Order: <code th:text="${orderId}">id</code>
+    </p>
+
+    <table class="table">
+        <thead><tr><th>Item</th><th>Qty</th><th class="text-end">Unit</th><th class="text-end">Line</th></tr></thead>
+        <tbody>
+            <tr th:each="line : ${lines}">
+                <td th:text="${line.name}">name</td>
+                <td th:text="${line.quantity}">1</td>
+                <td class="text-end" th:text="${line.unitPrice}">0</td>
+                <td class="text-end" th:text="${line.lineTotal}">0</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr><th colspan="3" class="text-end">Subtotal</th><th class="text-end" th:text="${subtotal}">0</th></tr>
+            <tr><th colspan="3" class="text-end">Tax</th><th class="text-end" th:text="${tax}">0</th></tr>
+            <tr><th colspan="3" class="text-end">Service</th><th class="text-end" th:text="${service}">0</th></tr>
+            <tr><th colspan="3" class="text-end">Cover</th><th class="text-end" th:text="${cover}">0</th></tr>
+            <tr class="table-active">
+                <th colspan="3" class="text-end">Total</th>
+                <th class="text-end" th:text="${total}">0</th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <form th:action="@{/bills}" method="post">
+        <input type="hidden" name="orderId" th:value="${orderId}">
+        <button class="btn btn-primary" type="submit">Generate Bill</button>
+        <a th:href="@{/tables}" class="btn btn-link">Cancel</a>
+    </form>
+</main>
+</body>
+</html>

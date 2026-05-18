@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Payment Confirmation')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container" style="max-width: 520px;">
+    <div class="alert alert-success">
+        <h1 class="h4 mb-2">Payment recorded</h1>
+        <p class="mb-0">Bill <strong th:text="${bill.billNumber}">BILL-…</strong> is now paid.</p>
+    </div>
+
+    <table class="table">
+        <tbody>
+            <tr><th>Method</th><td th:text="${payment.method}">CASH</td></tr>
+            <tr><th>Amount due</th><td th:text="${payment.amountDue}">0</td></tr>
+            <tr><th>Amount paid</th><td th:text="${payment.amountPaid}">0</td></tr>
+            <tr><th>Change due</th><td th:text="${payment.changeDue}">0</td></tr>
+            <tr th:if="${payment.reference != null}"><th>Reference</th>
+                <td th:text="${payment.reference}">REF</td></tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/tables}" class="btn btn-primary">Back to tables</a>
+</main>
+</body>
+</html>

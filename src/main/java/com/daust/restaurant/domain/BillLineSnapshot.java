@@ -18,4 +18,8 @@ public record BillLineSnapshot(String menuItemName, int quantity, BigDecimal rec
             throw new IllegalArgumentException("recordedUnitPrice must be > 0");
         }
     }
+
+    public BigDecimal lineTotal() {
+        return recordedUnitPrice.multiply(BigDecimal.valueOf(quantity));
+    }
 }

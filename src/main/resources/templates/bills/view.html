@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Bill')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-1">Bill</h1>
+    <p class="text-muted">
+        <strong th:text="${bill.billNumber}">BILL-…</strong> &middot;
+        <span th:if="${bill.paid}" class="badge bg-success">PAID</span>
+        <span th:unless="${bill.paid}" class="badge bg-warning text-dark">UNPAID</span>
+    </p>
+
+    <table class="table">
+        <thead><tr><th>Item</th><th>Qty</th><th class="text-end">Unit</th><th class="text-end">Line</th></tr></thead>
+        <tbody>
+            <tr th:each="line : ${bill.lineItems}">
+                <td th:text="${line.menuItemName}">name</td>
+                <td th:text="${line.quantity}">1</td>
+                <td class="text-end" th:text="${line.recordedUnitPrice}">0</td>
+                <td class="text-end" th:text="${line.lineTotal()}">0</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr><th colspan="3" class="text-end">Subtotal</th><th class="text-end" th:text="${bill.itemsSubtotal}">0</th></tr>
+            <tr><th colspan="3" class="text-end">Tax</th><th class="text-end" th:text="${bill.taxAmount}">0</th></tr>
+            <tr><th colspan="3" class="text-end">Service</th><th class="text-end" th:text="${bill.serviceChargeAmount}">0</th></tr>
+            <tr><th colspan="3" class="text-end">Cover</th><th class="text-end" th:text="${bill.coverChargeAmount}">0</th></tr>
+            <tr class="table-active">
+                <th colspan="3" class="text-end">Total</th>
+                <th class="text-end" th:text="${bill.total}">0</th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="d-flex gap-2">
+        <a th:unless="${bill.paid}" th:href="@{/payments/new(billId=${bill.id.value})}"
+           class="btn btn-primary">Record Payment</a>
+        <a th:href="@{/tables}" class="btn btn-link">Back to tables</a>
+    </div>
+</main>
+</body>
+</html>

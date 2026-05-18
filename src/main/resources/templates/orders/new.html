@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Start Order')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-3">Start New Order</h1>
+    <p class="text-muted">
+        Table: <code th:text="${tableId}">tableId</code>
+    </p>
+
+    <form th:action="@{/orders}" method="post" class="mb-4">
+        <input type="hidden" name="tableId" th:value="${tableId}">
+        <button class="btn btn-primary" type="submit">Start Order</button>
+        <a th:href="@{/tables}" class="btn btn-link">Cancel</a>
+    </form>
+
+    <h2 class="h5 mb-3">Menu</h2>
+    <div th:each="entry : ${menuByCategory}" class="mb-4">
+        <h3 class="h6 text-muted" th:text="${entry.key.name}">Category</h3>
+        <table class="table table-sm">
+            <thead><tr><th>Item</th><th class="text-end">Price (CFA)</th></tr></thead>
+            <tbody>
+                <tr th:each="item : ${entry.value}">
+                    <td th:text="${item.name}">Item</td>
+                    <td class="text-end" th:text="${item.unitPrice}">0</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

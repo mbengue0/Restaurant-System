@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tables')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-4">Tables</h1>
+
+    <div class="row g-3">
+        <div th:each="table : ${tables}" class="col-md-4 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Table</h5>
+                    <p class="card-text mb-2">
+                        <span class="text-muted">Capacity:</span>
+                        <span th:text="${table.capacity}">4</span>
+                    </p>
+                    <p class="mb-3">
+                        <span th:if="${table.status.name() == 'AVAILABLE'}"
+                              class="badge bg-success">AVAILABLE</span>
+                        <span th:if="${table.status.name() == 'OCCUPIED'}"
+                              class="badge bg-warning text-dark">OCCUPIED</span>
+                    </p>
+
+                    <form th:if="${table.status.name() == 'AVAILABLE'}"
+                          th:action="@{/tables/{id}/seat(id=${table.id.value})}" method="post"
+                          class="d-inline">
+                        <button class="btn btn-primary btn-sm" type="submit">Seat</button>
+                    </form>
+
+                    <a th:if="${table.status.name() == 'OCCUPIED'}"
+                       th:href="@{/orders/new(tableId=${table.id.value})}"
+                       class="btn btn-outline-primary btn-sm">New Order</a>
+                    <a th:if="${table.status.name() == 'OCCUPIED'}"
+                       th:href="@{/orders/active}"
+                       class="btn btn-outline-secondary btn-sm">Active Order</a>
+
+                    <small class="text-muted d-block mt-2"
+                           th:text="${'#' + #strings.substring(table.id.value, 0, 8)}">id</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

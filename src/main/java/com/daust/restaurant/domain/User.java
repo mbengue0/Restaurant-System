@@ -92,6 +92,14 @@ public class User {
         this.active = false;
     }
 
+    public void recordLogin(Instant when) {
+        Objects.requireNonNull(when, "when must not be null");
+        if (!this.active) {
+            throw new IllegalStateException("Cannot record login for inactive user");
+        }
+        this.lastLoginAt = when;
+    }
+
     public UserId getId() {
         return id;
     }

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Order')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-3">Order</h1>
+    <p class="mb-3">
+        <span class="badge bg-secondary me-2" th:text="${order.state}">STATE</span>
+        <span th:if="${order.visibleToKitchen}" class="badge bg-info text-dark">submitted</span>
+    </p>
+    <p class="text-muted small">
+        Order id: <code th:text="${order.id.value}">id</code><br>
+        Table: <code th:text="${order.tableId.value}">tid</code>
+    </p>
+
+    <h2 class="h5">Items</h2>
+    <table class="table">
+        <thead><tr><th>Item</th><th>Qty</th><th class="text-end">Unit</th>
+            <th class="text-end">Line</th><th></th></tr></thead>
+        <tbody>
+            <tr th:each="item : ${order.items}">
+                <td th:text="${itemNames.get(item.menuItemId)}">name</td>
+                <td th:text="${item.quantity}">1</td>
+                <td class="text-end" th:text="${item.recordedUnitPrice}">0</td>
+                <td class="text-end" th:text="${item.lineTotal()}">0</td>
+                <td>
+                    <form th:if="${order.state.name() == 'PLACED' and !order.visibleToKitchen}"
+                          th:action="@{/orders/{id}/items/{itemId}/remove(id=${order.id.value},itemId=${item.id.value})}"
+                          method="post" class="d-inline">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(order.items)}">
+                <td colspan="5" class="text-muted">No items yet.</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3" class="text-end">Subtotal</th>
+                <th class="text-end" th:text="${subtotal}">0</th>
+                <th></th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div th:if="${order.state.name() == 'PLACED' and !order.visibleToKitchen}" class="card mb-3">
+        <div class="card-body">
+            <h2 class="h6">Add item</h2>
+            <form th:action="@{/orders/{id}/items(id=${order.id.value})}" method="post" class="row g-2">
+                <div class="col-md-7">
+                    <select name="menuItemId" class="form-select" required>
+                        <option value="">— select —</option>
+                        <th:block th:each="entry : ${menuByCategory}">
+                            <optgroup th:label="${entry.key.name}">
+                                <option th:each="mi : ${entry.value}"
+                                        th:value="${mi.id.value}"
+                                        th:text="${mi.name + ' (' + mi.unitPrice + ')'}">item</option>
+                            </optgroup>
+                        </th:block>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="quantity" min="1" value="1"
+                           class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" type="submit">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <form th:if="${order.state.name() == 'PLACED' and !order.visibleToKitchen}"
+              th:action="@{/orders/{id}/submit(id=${order.id.value})}" method="post">
+            <button class="btn btn-success" type="submit">Submit to Kitchen</button>
+        </form>
+        <form th:if="${order.state.name() == 'READY'}"
+              th:action="@{/orders/{id}/serve(id=${order.id.value})}" method="post">
+            <button class="btn btn-success" type="submit">Mark Served</button>
+        </form>
+        <a th:if="${order.state.name() == 'SERVED'}"
+           th:href="@{/bills/new(orderId=${order.id.value})}" class="btn btn-outline-primary">
+            Generate Bill</a>
+        <a th:href="@{/tables}" class="btn btn-link">Back to tables</a>
+    </div>
+</main>
+</body>
+</html>

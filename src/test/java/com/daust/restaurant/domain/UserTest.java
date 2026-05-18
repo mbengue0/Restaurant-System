@@ -182,6 +182,32 @@ class UserTest {
     }
 
     @Test
+    void recordLogin_updatesLastLoginAtOnActiveUser() {
+        User user = new User("alice", HASH, "Alice", Role.WAITER, false);
+        Instant when = Instant.parse("2026-05-17T10:15:30Z");
+
+        user.recordLogin(when);
+
+        assertThat(user.getLastLoginAt()).isEqualTo(when);
+    }
+
+    @Test
+    void recordLogin_throwsOnInactiveUser() {
+        User user = new User("alice", HASH, "Alice", Role.WAITER, false);
+        user.deactivate();
+
+        assertThatThrownBy(() -> user.recordLogin(Instant.now()))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void recordLogin_rejectsNullTimestamp() {
+        User user = new User("alice", HASH, "Alice", Role.WAITER, false);
+
+        assertThatThrownBy(() -> user.recordLogin(null)).isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
     void newUsers_haveDistinctIds() {
         User a = new User("alice", HASH, "Alice", Role.WAITER, false);
         User b = new User("bob", HASH, "Bob", Role.WAITER, false);
