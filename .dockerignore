@@ -1,0 +1,13 @@
+target/
+.git/
+.idea/
+.vscode/
+.claude/
+.mvn/wrapper/maven-wrapper.jar
+*.iml
+*.log
+docs/
+graphify-out/
+HELP.md
+TESTING.md
+README.md
