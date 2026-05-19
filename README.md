@@ -1,17 +1,14 @@
 # Restaurant Ordering and Table Management System
 
 CS 2712 — Software Design & Architecture (DAUST).
-Server-rendered Java 21 / Spring Boot 4 implementation of the design report
-in `docs/`. Java backend, Thymeleaf views, PostgreSQL, BCrypt auth,
+Server-rendered Java 21 / Spring Boot 4 implementation of the design report. Java backend, Thymeleaf views, PostgreSQL, BCrypt auth,
 role-based access for Admin / Manager / Waiter / Kitchen Staff.
 
-This README is the **how-to-run** entry point. For architecture see
-`CLAUDE.md`; for testing see `TESTING.md`; for the full design report see
-`docs/` (read offline — it's not checked in via `.gitignore`).
+This README is the **how-to-run** entry point.
 
 ---
 
-## Quick start — Docker (recommended)
+## Quick start — Docker 
 
 You need **Docker Desktop** (or Docker Engine + Compose v2). Nothing else:
 no local Java, no local Postgres.
@@ -107,7 +104,7 @@ to end, against an in-memory database.
 ## Build, test, package
 
 ```bash
-./mvnw test                       # run all 341 tests (see TESTING.md)
+./mvnw test                       # run all 341 tests
 ./mvnw clean package              # build jar → target/restaurant-system-*.jar
 ./mvnw spring-boot:run            # run from source
 java -jar target/restaurant-system-*.jar   # run the packaged jar
@@ -154,34 +151,10 @@ src/main/resources/
   templates/       # Thymeleaf HTML (Bootstrap 5 from CDN)
   application.properties           # dev defaults
   application-prod.properties      # prod overrides
-docs/              # full design report (Sections 1–8, diagrams)
-CLAUDE.md          # architecture rules + implementation conventions
-TESTING.md        # test strategy + per-class counts (341 total)
 ```
 
-See `CLAUDE.md` "Architecture — Strict Clean Architecture" for the
+"Architecture — Strict Clean Architecture" for the
 dependency rule between layers; it's enforced socially, not by a build
 tool.
 
----
 
-## Deploying elsewhere
-
-The container image produced by `Dockerfile` is self-contained: it needs
-only Java-compatible compute, the three `SPRING_DATASOURCE_*` env vars,
-and reachable Postgres. It runs out of the box on:
-
-- **Render** — connect this repo, choose "Web Service" with the
-  `Dockerfile` build mode, attach a Render Postgres add-on, set the env
-  vars from its connection info.
-- **Railway** — `railway up`, add a Postgres plugin, set the env vars.
-- **Fly.io** — `fly launch` (picks up the `Dockerfile`), `fly postgres
-  create`, `fly secrets set ...`.
-- **A VPS** — `docker compose up -d` (the included compose file is what
-  you want).
-- **Kubernetes** — wrap the image in a Deployment + Service, point at
-  any reachable Postgres, supply the same env vars.
-
-The author of this project is a student and runs it locally. The Docker
-setup above is provided so a reviewer can spin it up in one command on
-any machine that has Docker.
