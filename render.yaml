@@ -1,0 +1,40 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Deploy with: Render Dashboard → New → Blueprint → pick this repo → Apply.
+# Creates a free Postgres database and a free Docker web service, wired together.
+
+databases:
+  - name: restaurant-db
+    databaseName: restaurant_system
+    user: restaurant
+    plan: free
+
+services:
+  - type: web
+    name: restaurant-system
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DB_HOST
+        fromDatabase:
+          name: restaurant-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: restaurant-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: restaurant-db
+          property: database
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: restaurant-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: restaurant-db
+          property: password

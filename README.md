@@ -157,4 +157,26 @@ src/main/resources/
 dependency rule between layers; it's enforced socially, not by a build
 tool.
 
+---
+
+## Deploying elsewhere
+
+The container image produced by `Dockerfile` is self-contained: it needs
+only Java-compatible compute, the three `SPRING_DATASOURCE_*` env vars,
+and reachable Postgres. It runs out of the box on:
+
+- **Render** — connect this repo, choose "Web Service" with the
+  `Dockerfile` build mode, attach a Render Postgres add-on, set the env
+  vars from its connection info.
+- **Railway** — `railway up`, add a Postgres plugin, set the env vars.
+- **Fly.io** — `fly launch` (picks up the `Dockerfile`), `fly postgres
+  create`, `fly secrets set ...`.
+- **A VPS** — `docker compose up -d` (the included compose file is what
+  you want).
+- **Kubernetes** — wrap the image in a Deployment + Service, point at
+  any reachable Postgres, supply the same env vars.
+
+The author of this project is a student and runs it locally. The Docker
+setup above is provided so a reviewer can spin it up in one command on
+any machine that has Docker.
 
