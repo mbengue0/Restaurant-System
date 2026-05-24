@@ -94,6 +94,62 @@ public class Bill {
         this.paid = false;
     }
 
+    /**
+     * UC16 — single combined Bill from N merged Orders. The {@code orderIds} bridge records every
+     * source order. Cover charge is applied once (the customers share one cover total for the
+     * combined party); BR3 calculation mirrors the single-order path otherwise.
+     */
+    public static Bill forMergedOrders(
+            List<Order> orders, Configuration configuration, Map<MenuItemId, String> nameLookup) {
+        Objects.requireNonNull(orders, "orders must not be null");
+        Objects.requireNonNull(configuration, "configuration must not be null");
+        Objects.requireNonNull(nameLookup, "nameLookup must not be null");
+        if (orders.size() < 2) {
+            throw new IllegalArgumentException("Merge requires at least 2 orders");
+        }
+
+        Set<OrderId> orderIds = new HashSet<>();
+        List<BillLineSnapshot> snapshots = new ArrayList<>();
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (Order order : orders) {
+            if (!orderIds.add(order.getId())) {
+                throw new IllegalArgumentException("Duplicate Order in merge: " + order.getId());
+            }
+            for (OrderItem item : order.getItems()) {
+                String name = nameLookup.get(item.getMenuItemId());
+                if (name == null) {
+                    throw new IllegalArgumentException(
+                            "nameLookup missing entry for menu item " + item.getMenuItemId());
+                }
+                BillLineSnapshot snap = new BillLineSnapshot(name, item.getQuantity(), item.getRecordedUnitPrice());
+                snapshots.add(snap);
+                subtotal = subtotal.add(snap.recordedUnitPrice().multiply(BigDecimal.valueOf(snap.quantity())));
+            }
+        }
+        if (snapshots.isEmpty()) {
+            throw new IllegalArgumentException("Merged Bill requires at least one item");
+        }
+
+        BigDecimal subtotalRounded = roundMoney(subtotal);
+        BigDecimal tax = roundMoney(configuration.getTaxRate().multiply(subtotalRounded));
+        BigDecimal service = roundMoney(configuration.getServiceChargeRate().multiply(subtotalRounded));
+        BigDecimal cover = roundMoney(configuration.getCoverChargeAmount());
+        BigDecimal total = subtotalRounded.add(tax).add(service).add(cover);
+
+        return new Bill(
+                BillId.generate(),
+                generateBillNumber(),
+                Set.copyOf(orderIds),
+                LocalDateTime.now(),
+                List.copyOf(snapshots),
+                subtotalRounded,
+                tax,
+                service,
+                cover,
+                total,
+                false);
+    }
+
     public static Bill reconstitute(
             BillId id,
             String billNumber,

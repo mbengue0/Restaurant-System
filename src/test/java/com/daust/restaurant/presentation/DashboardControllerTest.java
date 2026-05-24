@@ -3,9 +3,14 @@ package com.daust.restaurant.presentation;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import static org.mockito.Mockito.when;
+
+import com.daust.restaurant.domain.ConfigurationRepository;
 import com.daust.restaurant.infrastructure.security.JpaUserDetailsService;
 import com.daust.restaurant.infrastructure.security.RoleBasedAuthenticationSuccessHandler;
 import com.daust.restaurant.infrastructure.security.SecurityConfig;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -20,8 +25,14 @@ class DashboardControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
+    @MockitoBean private ConfigurationRepository configurationRepository;
     @MockitoBean private RoleBasedAuthenticationSuccessHandler successHandler;
     @MockitoBean private JpaUserDetailsService userDetailsService;
+
+    @BeforeEach
+    void stubConfig() {
+        when(configurationRepository.load()).thenReturn(Optional.empty());
+    }
 
     @Test
     @WithMockUser(roles = "MANAGER")

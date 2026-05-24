@@ -49,6 +49,16 @@
                 </div>
             </a>
         </div>
+        <div class="col-md-4"
+             th:if="${splitMergeEnabled}"
+             sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
+            <a th:href="@{/orders/merge}" class="card text-decoration-none h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Merge Orders</h5>
+                    <p class="card-text text-muted">Combine several served orders into one bill (UC16).</p>
+                </div>
+            </a>
+        </div>
         <div class="col-md-4" sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/admin/users}" class="card text-decoration-none h-100">
                 <div class="card-body">

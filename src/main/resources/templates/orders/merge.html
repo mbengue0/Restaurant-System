@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Merge Orders')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-3">Merge Orders</h1>
+    <p class="text-muted">
+        UC16 — combine multiple SERVED orders into a single bill (BR6). Cover
+        charge is applied once for the merged party.
+    </p>
+
+    <form th:action="@{/orders/merge}" method="post">
+        <div th:if="${#lists.isEmpty(eligible)}" class="alert alert-info">
+            No SERVED orders without a bill are available to merge right now.
+        </div>
+
+        <table th:unless="${#lists.isEmpty(eligible)}" class="table align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 1%;"></th>
+                    <th>Order</th>
+                    <th>Table</th>
+                    <th class="text-end">Items</th>
+                    <th class="text-end">Subtotal (items only)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="o : ${eligible}">
+                    <td>
+                        <input type="checkbox" class="form-check-input"
+                               name="orderIds" th:value="${o.id}">
+                    </td>
+                    <td>
+                        <code class="small"
+                              th:text="${#strings.substring(o.id.toString(), 0, 8)}"
+                              th:title="${o.id}">id</code>
+                    </td>
+                    <td th:text="${o.tableLabel}">Table</td>
+                    <td class="text-end" th:text="${o.itemCount}">0</td>
+                    <td class="text-end" th:text="${o.subtotal}">0</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button class="btn btn-primary"
+                th:unless="${#lists.isEmpty(eligible)}"
+                type="submit">Merge selected → 1 bill</button>
+        <a th:href="@{/dashboard}" class="btn btn-link">Back to dashboard</a>
+    </form>
+</main>
+</body>
+</html>

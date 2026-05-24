@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/kitchen/**").hasAnyRole("KITCHEN_STAFF", "ADMIN")
                         // Split/merge entry points sit under /orders/ but are Manager/Admin
                         // only (UC15/UC16). More-specific rule first.
-                        .requestMatchers("/orders/*/split", "/orders/*/split/**")
+                        .requestMatchers("/orders/*/split", "/orders/*/split/**", "/orders/merge")
                         .hasAnyRole("MANAGER", "ADMIN")
                         .requestMatchers("/waiter/**", "/tables/**", "/orders/**")
                         .hasAnyRole("WAITER", "MANAGER", "ADMIN")
