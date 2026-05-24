@@ -33,11 +33,14 @@
         </tfoot>
     </table>
 
-    <form th:action="@{/bills}" method="post">
+    <form th:action="@{/bills}" method="post" class="d-inline">
         <input type="hidden" name="orderId" th:value="${orderId}">
         <button class="btn btn-primary" type="submit">Generate Bill</button>
-        <a th:href="@{/tables}" class="btn btn-link">Cancel</a>
     </form>
+    <a th:if="${splitEnabled}"
+       th:href="@{'/orders/' + ${orderId} + '/split'}"
+       class="btn btn-outline-primary">Split Bill</a>
+    <a th:href="@{/tables}" class="btn btn-link">Cancel</a>
 </main>
 </body>
 </html>

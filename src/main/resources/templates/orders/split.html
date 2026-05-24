@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Split Order')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-3">Split Order</h1>
+    <p class="text-muted small">
+        Order: <code th:text="${orderId}">id</code>.
+        Assign each item to a sub-bill; the cover charge is split equally across
+        the bills (BR3).
+    </p>
+
+    <form method="get" th:action="@{'/orders/' + ${orderId} + '/split'}" class="row g-2 mb-3">
+        <div class="col-auto">
+            <label class="form-label small mb-0" for="groups">Number of sub-bills</label>
+            <select class="form-select form-select-sm" id="groups" name="groups">
+                <option th:each="n : ${ {2, 3, 4} }"
+                        th:value="${n}"
+                        th:text="${n}"
+                        th:selected="${n == groupCount}">2</option>
+            </select>
+        </div>
+        <div class="col-auto align-self-end">
+            <button class="btn btn-outline-secondary btn-sm" type="submit">Update</button>
+        </div>
+    </form>
+
+    <form th:action="@{'/orders/' + ${orderId} + '/split'}" method="post">
+        <input type="hidden" name="groupCount" th:value="${groupCount}">
+
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="text-end">Qty</th>
+                    <th class="text-end">Unit</th>
+                    <th class="text-end">Line</th>
+                    <th style="min-width: 160px;">Assign to</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="line : ${lines}">
+                    <td th:text="${line.name}">name</td>
+                    <td class="text-end" th:text="${line.quantity}">1</td>
+                    <td class="text-end" th:text="${line.unitPrice}">0</td>
+                    <td class="text-end" th:text="${line.lineTotal}">0</td>
+                    <td>
+                        <select class="form-select form-select-sm"
+                                th:name="${'assign-' + line.id}">
+                            <option th:each="g : ${groupRange}"
+                                    th:value="${g}"
+                                    th:text="${'Bill ' + g}"
+                                    th:selected="${g == 1}">Bill 1</option>
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button class="btn btn-primary" type="submit">Generate split bills</button>
+        <a th:href="@{'/bills/new?orderId=' + ${orderId}}" class="btn btn-link">Cancel</a>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Split Bills')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-3">Split Bills</h1>
+    <p class="text-muted small">
+        Order: <code th:text="${orderId}">id</code>.
+        The following bills were generated. Open each one to record a payment.
+    </p>
+
+    <div class="list-group mb-4">
+        <a th:each="b, iStat : ${bills}"
+           th:href="@{'/bills/' + ${b.id}}"
+           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <span>
+                <strong th:text="${'Bill ' + (iStat.index + 1)}">Bill 1</strong>
+                — <code th:text="${b.billNumber}">BILL-...</code>
+            </span>
+            <span th:text="${b.total} + ' CFA'">0 CFA</span>
+        </a>
+    </div>
+
+    <a th:href="@{/dashboard}" class="btn btn-link">Back to dashboard</a>
+</main>
+</body>
+</html>

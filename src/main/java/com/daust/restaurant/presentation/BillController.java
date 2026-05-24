@@ -93,6 +93,7 @@ public class BillController {
         model.addAttribute("service", service);
         model.addAttribute("cover", cover);
         model.addAttribute("total", total);
+        model.addAttribute("splitEnabled", config.isSplitMergePolicyEnabled());
         return "bills/preview";
     }
 
