@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('New Table')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-3">New Table</h1>
+
+    <form th:action="@{/admin/tables}" method="post" class="row g-3" style="max-width: 480px;">
+        <div class="col-12">
+            <label for="capacity" class="form-label">
+                Capacity <span class="text-muted small">(number of seats)</span>
+            </label>
+            <input type="number" min="1" step="1" required
+                   id="capacity" name="capacity" class="form-control" value="2">
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a th:href="@{/admin/tables}" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

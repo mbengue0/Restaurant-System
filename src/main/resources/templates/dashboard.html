@@ -50,6 +50,14 @@
             </a>
         </div>
         <div class="col-md-4" sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/tables}" class="card text-decoration-none h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Manage Tables</h5>
+                    <p class="card-text text-muted">Create, deactivate tables (UC02).</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4" sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/admin/configuration}" class="card text-decoration-none h-100">
                 <div class="card-body">
                     <h5 class="card-title">System Settings</h5>
