@@ -86,6 +86,9 @@
         <a th:if="${order.state.name() == 'SERVED'}"
            th:href="@{/bills/new(orderId=${order.id.value})}" class="btn btn-outline-primary">
             Generate Bill</a>
+        <a th:if="${order.state.name() != 'COMPLETED' and order.state.name() != 'CANCELLED'}"
+           th:href="@{/orders/{id}/cancel(id=${order.id.value})}"
+           class="btn btn-outline-danger">Cancel Order</a>
         <a th:href="@{/tables}" class="btn btn-link">Back to tables</a>
     </div>
 </main>

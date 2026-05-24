@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('System Settings')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-3">System Settings</h1>
+    <p class="text-muted">
+        Runtime configuration (UC18 / BR6). Changes take effect immediately on the
+        next bill generation; existing bills are not retroactively recalculated.
+    </p>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h5 card-title">Rates &amp; charges</h2>
+                    <form th:action="@{/admin/configuration}" method="post">
+                        <div class="mb-3">
+                            <label for="taxRate" class="form-label">
+                                Tax rate <span class="text-muted small">(0–1, e.g. 0.18 for 18%)</span>
+                            </label>
+                            <input type="number" step="0.0001" min="0" max="1"
+                                   id="taxRate" name="taxRate" required
+                                   class="form-control"
+                                   th:value="${config.taxRate}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="serviceChargeRate" class="form-label">
+                                Service-charge rate <span class="text-muted small">(0–1)</span>
+                            </label>
+                            <input type="number" step="0.0001" min="0" max="1"
+                                   id="serviceChargeRate" name="serviceChargeRate" required
+                                   class="form-control"
+                                   th:value="${config.serviceChargeRate}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="coverChargeAmount" class="form-label">
+                                Cover charge <span class="text-muted small">(per cover, CFA)</span>
+                            </label>
+                            <input type="number" step="0.01" min="0"
+                                   id="coverChargeAmount" name="coverChargeAmount" required
+                                   class="form-control"
+                                   th:value="${config.coverChargeAmount}">
+                        </div>
+                        <button class="btn btn-primary" type="submit">Save rates</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h5 card-title">Accepted payment methods</h2>
+                    <form th:action="@{/admin/configuration/payment-methods}" method="post">
+                        <div class="mb-3">
+                            <div class="form-check" th:each="m : ${allPaymentMethods}">
+                                <input class="form-check-input" type="checkbox"
+                                       name="methods"
+                                       th:id="${'method-' + m.name()}"
+                                       th:value="${m.name()}"
+                                       th:checked="${config.acceptedPaymentMethods.contains(m)}">
+                                <label class="form-check-label"
+                                       th:for="${'method-' + m.name()}"
+                                       th:text="${m}">METHOD</label>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Save methods</button>
+                        <p class="text-muted small mt-2 mb-0">
+                            At least one method is required (Domain rejects empty sets).
+                        </p>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h5 card-title">Split / merge policy</h2>
+                    <form th:action="@{/admin/configuration/policy}" method="post">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox"
+                                   id="splitMergeEnabled" name="splitMergeEnabled" value="true"
+                                   th:checked="${config.splitMergePolicyEnabled}">
+                            <label class="form-check-label" for="splitMergeEnabled">
+                                Allow waiters to split orders and merge multiple orders into one bill
+                            </label>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Save policy</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="mt-4">
+        <a th:href="@{/dashboard}" class="btn btn-link">Back to dashboard</a>
+    </p>
+</main>
+</body>
+</html>

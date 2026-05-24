@@ -1,8 +1,10 @@
 package com.daust.restaurant.presentation;
 
+import com.daust.restaurant.application.CancelOrderService;
 import com.daust.restaurant.application.OrderLifecycleService;
 import com.daust.restaurant.application.OrderNotFoundException;
 import com.daust.restaurant.application.PlaceOrderService;
+import com.daust.restaurant.domain.CancellationReason;
 import com.daust.restaurant.domain.Category;
 import com.daust.restaurant.domain.CategoryRepository;
 import com.daust.restaurant.domain.MenuItem;
@@ -14,9 +16,11 @@ import com.daust.restaurant.domain.OrderItem;
 import com.daust.restaurant.domain.OrderItemId;
 import com.daust.restaurant.domain.OrderRepository;
 import com.daust.restaurant.domain.OrderState;
+import com.daust.restaurant.domain.Role;
 import com.daust.restaurant.domain.Table;
 import com.daust.restaurant.domain.TableId;
 import com.daust.restaurant.domain.TableRepository;
+import com.daust.restaurant.domain.User;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,6 +46,7 @@ public class OrderController {
     private final TableRepository tableRepository;
     private final PlaceOrderService placeOrderService;
     private final OrderLifecycleService lifecycleService;
+    private final CancelOrderService cancelOrderService;
     private final CurrentUserHelper currentUser;
 
     public OrderController(
@@ -51,6 +56,7 @@ public class OrderController {
             TableRepository tableRepository,
             PlaceOrderService placeOrderService,
             OrderLifecycleService lifecycleService,
+            CancelOrderService cancelOrderService,
             CurrentUserHelper currentUser) {
         this.orderRepository = orderRepository;
         this.menuItemRepository = menuItemRepository;
@@ -58,6 +64,7 @@ public class OrderController {
         this.tableRepository = tableRepository;
         this.placeOrderService = placeOrderService;
         this.lifecycleService = lifecycleService;
+        this.cancelOrderService = cancelOrderService;
         this.currentUser = currentUser;
     }
 
@@ -153,6 +160,32 @@ public class OrderController {
     public String serve(@PathVariable UUID id, Authentication authentication) {
         lifecycleService.markServed(OrderId.of(id), currentUser.currentUserId(authentication));
         return "redirect:/tables";
+    }
+
+    @GetMapping("/orders/{id}/cancel")
+    public String cancelForm(@PathVariable UUID id, Model model) {
+        Order order = orderRepository
+                .findById(OrderId.of(id))
+                .orElseThrow(() -> new OrderNotFoundException("Order not found: " + id));
+        Table table = tableRepository.findById(order.getTableId()).orElse(null);
+        model.addAttribute("order", order);
+        model.addAttribute("table", table);
+        model.addAttribute("reasons", CancellationReason.values());
+        return "orders/cancel";
+    }
+
+    @PostMapping("/orders/{id}/cancel")
+    public String cancel(
+            @PathVariable UUID id,
+            @RequestParam("reason") CancellationReason reason,
+            @RequestParam(value = "note", required = false) String note,
+            Authentication authentication) {
+        User actor = currentUser.loadCurrent(authentication);
+        cancelOrderService.cancelOrder(OrderId.of(id), reason, note, actor.getId());
+        // Managers came from the dashboard; waiters from the active-orders list.
+        return actor.getRole() == Role.MANAGER || actor.getRole() == Role.ADMIN
+                ? "redirect:/dashboard"
+                : "redirect:/orders/active";
     }
 
     private Map<Category, List<MenuItem>> menuByCategory() {

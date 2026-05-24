@@ -26,6 +26,9 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/css/**", "/js/**", "/webjars/**", "/error")
                         .permitAll()
                         .requestMatchers("/dashboard").hasAnyRole("ADMIN", "MANAGER")
+                        // Menu management (UC04–UC07) is allowed for both Admin and Manager,
+                        // even though it lives under /admin/. More-specific rule first.
+                        .requestMatchers("/admin/menu/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")
                         .requestMatchers("/kitchen/**").hasAnyRole("KITCHEN_STAFF", "ADMIN")

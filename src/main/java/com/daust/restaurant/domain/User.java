@@ -80,6 +80,19 @@ public class User {
         this.mustChangePassword = false;
     }
 
+    /**
+     * Admin-initiated password reset (UC17d). Sets the new hash and forces the user to change it
+     * on next login (NFR-SEC-2). Distinct from {@link #changeHashedPassword(String)}, which the
+     * user themselves invokes after entering the temp password.
+     */
+    public void resetPasswordByAdmin(String newHashedPassword) {
+        if (!this.active) {
+            throw new IllegalStateException("Cannot reset password for inactive user");
+        }
+        this.hashedPassword = requireNonBlankHash(newHashedPassword);
+        this.mustChangePassword = true;
+    }
+
     public void updateFullName(String newFullName) {
         this.fullName = normalizeFullName(newFullName);
     }

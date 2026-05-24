@@ -54,6 +54,9 @@
                     <a th:if="${order.state.name() == 'PLACED' or order.state.name() == 'SERVED'}"
                        th:href="@{/orders/{id}/edit(id=${order.id.value})}"
                        class="btn btn-outline-secondary btn-sm">Open</a>
+                    <a th:if="${order.state.name() != 'COMPLETED' and order.state.name() != 'CANCELLED'}"
+                       th:href="@{/orders/{id}/cancel(id=${order.id.value})}"
+                       class="btn btn-outline-danger btn-sm">Cancel</a>
                 </td>
             </tr>
         </tbody>

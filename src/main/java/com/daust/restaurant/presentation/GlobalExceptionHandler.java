@@ -3,6 +3,9 @@ package com.daust.restaurant.presentation;
 import com.daust.restaurant.application.BillAlreadyGeneratedException;
 import com.daust.restaurant.application.BillAlreadyPaidException;
 import com.daust.restaurant.application.BillNotFoundException;
+import com.daust.restaurant.application.CategoryHasActiveItemsException;
+import com.daust.restaurant.application.CategoryNotFoundException;
+import com.daust.restaurant.application.LastActiveAdminException;
 import com.daust.restaurant.application.MenuItemNotFoundException;
 import com.daust.restaurant.application.OrderNotFoundException;
 import com.daust.restaurant.application.PaymentMethodNotAcceptedException;
@@ -10,6 +13,7 @@ import com.daust.restaurant.application.TableAlreadyOccupiedException;
 import com.daust.restaurant.application.TableNotFoundException;
 import com.daust.restaurant.application.TableNotOccupiedException;
 import com.daust.restaurant.application.UserNotFoundException;
+import com.daust.restaurant.application.UsernameTakenException;
 import com.daust.restaurant.domain.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -32,7 +36,11 @@ public class GlobalExceptionHandler {
         BillAlreadyGeneratedException.class,
         BillAlreadyPaidException.class,
         MenuItemNotFoundException.class,
+        CategoryNotFoundException.class,
+        CategoryHasActiveItemsException.class,
         UserNotFoundException.class,
+        UsernameTakenException.class,
+        LastActiveAdminException.class,
         PaymentMethodNotAcceptedException.class
     })
     public String handleApplicationException(

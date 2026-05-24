@@ -32,6 +32,31 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4"
+             sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
+            <a th:href="@{/admin/menu}" class="card text-decoration-none h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Manage Menu</h5>
+                    <p class="card-text text-muted">Categories, items, prices (UC04–UC07).</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4" sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/users}" class="card text-decoration-none h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Manage Users</h5>
+                    <p class="card-text text-muted">Accounts, roles, password resets (UC17).</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4" sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/configuration}" class="card text-decoration-none h-100">
+                <div class="card-body">
+                    <h5 class="card-title">System Settings</h5>
+                    <p class="card-text text-muted">Tax, charges, payment methods, policies (UC18).</p>
+                </div>
+            </a>
+        </div>
     </div>
 </main>
 </body>

@@ -56,6 +56,14 @@ public class MenuItem {
         this.unitPrice = requirePositive(newPrice);
     }
 
+    public void updateName(String newName) {
+        this.name = normalizeName(newName);
+    }
+
+    public void updateDescription(String newDescription) {
+        this.description = normalizeDescription(newDescription);
+    }
+
     public void deactivate() {
         this.active = false;
     }

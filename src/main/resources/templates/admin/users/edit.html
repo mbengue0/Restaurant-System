@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Edit User')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-3">Edit User</h1>
+
+    <p class="text-muted small">
+        Username: <code th:text="${user.username}">name</code>
+        <span class="ms-2">(usernames are immutable; reset password to issue new credentials)</span>
+    </p>
+
+    <form th:action="@{/admin/users/{id}(id=${user.id.value})}" method="post"
+          class="card card-body" style="max-width: 32rem;">
+        <div class="mb-3">
+            <label for="fullName" class="form-label">Full name</label>
+            <input type="text" id="fullName" name="fullName" required maxlength="100"
+                   class="form-control" th:value="${user.fullName}">
+        </div>
+        <div class="mb-3">
+            <label for="role" class="form-label">Role</label>
+            <select id="role" name="role" class="form-select" required>
+                <option th:each="r : ${roles}"
+                        th:value="${r.name()}"
+                        th:text="${r}"
+                        th:selected="${r == user.role}">ROLE</option>
+            </select>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Save</button>
+            <a th:href="@{/admin/users}" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

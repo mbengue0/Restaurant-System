@@ -182,6 +182,34 @@ class UserTest {
     }
 
     @Test
+    void resetPasswordByAdmin_setsHashAndForcesMustChangePassword() {
+        User user = new User("alice", HASH, "Alice", Role.WAITER, false);
+        String newHash = "$2a$10$adminResetHash................................";
+
+        user.resetPasswordByAdmin(newHash);
+
+        assertThat(user.getHashedPassword()).isEqualTo(newHash);
+        assertThat(user.isMustChangePassword()).isTrue();
+    }
+
+    @Test
+    void resetPasswordByAdmin_throwsOnInactiveUser() {
+        User user = new User("alice", HASH, "Alice", Role.WAITER, false);
+        user.deactivate();
+
+        assertThatThrownBy(() -> user.resetPasswordByAdmin("$2a$10$x")).isInstanceOf(
+                IllegalStateException.class);
+    }
+
+    @Test
+    void resetPasswordByAdmin_rejectsBlankHash() {
+        User user = new User("alice", HASH, "Alice", Role.WAITER, false);
+
+        assertThatThrownBy(() -> user.resetPasswordByAdmin("")).isInstanceOf(
+                IllegalArgumentException.class);
+    }
+
+    @Test
     void recordLogin_updatesLastLoginAtOnActiveUser() {
         User user = new User("alice", HASH, "Alice", Role.WAITER, false);
         Instant when = Instant.parse("2026-05-17T10:15:30Z");
