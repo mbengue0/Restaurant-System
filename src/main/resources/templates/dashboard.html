@@ -41,6 +41,14 @@
                 </div>
             </a>
         </div>
+        <div class="col-md-4" sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
+            <a th:href="@{/reports/daily}" class="card text-decoration-none h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Daily Report</h5>
+                    <p class="card-text text-muted">Sales summary by day (UC19).</p>
+                </div>
+            </a>
+        </div>
         <div class="col-md-4" sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/admin/users}" class="card text-decoration-none h-100">
                 <div class="card-body">

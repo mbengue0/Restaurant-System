@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Daily Sales Summary')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="mb-3">Daily Sales Summary</h1>
+    <p class="text-muted">
+        UC19 — payments recorded on the selected day, with bill-derived tax and
+        service-charge totals.
+    </p>
+
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/reports/daily}">
+        <div class="col-auto">
+            <label for="date" class="form-label mb-1">Date</label>
+            <input type="date" id="date" name="date" class="form-control form-control-sm"
+                   th:value="${date}">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary btn-sm" type="submit">Show</button>
+            <a th:href="@{/reports/daily}" class="btn btn-outline-secondary btn-sm">Today</a>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-bg-primary h-100">
+                <div class="card-body">
+                    <div class="text-uppercase small opacity-75">Total revenue</div>
+                    <div class="display-6"
+                         th:text="${summary.totalRevenue()} + ' CFA'">0 CFA</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-uppercase small text-muted">Bills paid</div>
+                    <div class="display-6" th:text="${summary.billCount()}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-uppercase small text-muted">Date</div>
+                    <div class="display-6"
+                         th:text="${#temporals.format(summary.date(), 'yyyy-MM-dd')}">2026-01-01</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header"><strong>By payment method</strong></div>
+                <div class="card-body p-0">
+                    <table class="table mb-0">
+                        <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th class="text-end">Count</th>
+                            <th class="text-end">Total (CFA)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="m : ${paymentMethods}">
+                            <td th:text="${m}">METHOD</td>
+                            <td class="text-end"
+                                th:text="${summary.byMethod().get(m).count()}">0</td>
+                            <td class="text-end"
+                                th:text="${summary.byMethod().get(m).total()}">0</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header"><strong>Taxes &amp; charges collected</strong></div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Tax</span>
+                        <strong th:text="${summary.totalTax()} + ' CFA'">0 CFA</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Service charge</span>
+                        <strong th:text="${summary.totalServiceCharge()} + ' CFA'">0 CFA</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <p class="mt-4">
+        <a th:href="@{/dashboard}" class="btn btn-link">Back to dashboard</a>
+    </p>
+</main>
+</body>
+</html>
