@@ -81,7 +81,7 @@ class CancelOrderServiceTest {
 
         assertThatThrownBy(() -> cancelOrderService.cancelOrder(
                         order.getId(), CancellationReason.OTHER, null, waiter.getId()))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(com.daust.restaurant.domain.UnauthorizedException.class)
                 .hasMessageContaining("MANAGER");
 
         assertThat(order.getState()).isEqualTo(OrderState.IN_PREPARATION);

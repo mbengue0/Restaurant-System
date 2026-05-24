@@ -147,7 +147,7 @@ public class Order {
             throw new IllegalStateException("cannot cancel order in terminal state " + this.state);
         }
         if (this.state != OrderState.PLACED && byUser.getRole() != Role.MANAGER) {
-            throw new IllegalStateException(
+            throw new UnauthorizedException(
                     "only MANAGER can cancel an order in state " + this.state + " (BR5); was "
                             + byUser.getRole());
         }

@@ -283,7 +283,7 @@ class OrderTest {
 
         assertThatThrownBy(() ->
                         order.cancel(CancellationReason.CUSTOMER_COMPLAINT, "guest unhappy", userWith(Role.WAITER)))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(UnauthorizedException.class);
         assertThat(order.getState()).isEqualTo(state);
     }
 
@@ -294,7 +294,7 @@ class OrderTest {
 
         assertThatThrownBy(() ->
                         order.cancel(CancellationReason.OTHER, "no comment", userWith(Role.KITCHEN_STAFF)))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @ParameterizedTest
@@ -304,7 +304,7 @@ class OrderTest {
 
         assertThatThrownBy(() ->
                         order.cancel(CancellationReason.OTHER, "audit override", userWith(Role.ADMIN)))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @ParameterizedTest
