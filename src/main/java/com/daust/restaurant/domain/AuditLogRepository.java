@@ -17,4 +17,6 @@ public interface AuditLogRepository {
     List<AuditLogEntry> findByTimestampBetween(LocalDateTime from, LocalDateTime to);
 
     List<AuditLogEntry> findByAffectedEntity(String entityType, String entityId);
+
+    List<AuditLogEntry> findRecent(int limit);
 }

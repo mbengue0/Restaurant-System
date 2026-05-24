@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Audit Log')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container-fluid px-4">
+    <h1 class="mb-3">Audit Log</h1>
+    <p class="text-muted">
+        UC20 — read-only system event history (NFR-AUD-1/2/3). Entries are
+        immutable and survive user deletion.
+    </p>
+
+    <form class="row g-2 align-items-end mb-3" method="get" th:action="@{/admin/audit}">
+        <div class="col-md-3">
+            <label for="eventType" class="form-label mb-1">Event type</label>
+            <select id="eventType" name="eventType" class="form-select form-select-sm">
+                <option value="">— any —</option>
+                <option th:each="t : ${eventTypes}"
+                        th:value="${t}"
+                        th:text="${t}"
+                        th:selected="${t == selectedEventType}">EVENT</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="from" class="form-label mb-1">From</label>
+            <input type="date" id="from" name="from" class="form-control form-control-sm"
+                   th:value="${from}">
+        </div>
+        <div class="col-md-2">
+            <label for="to" class="form-label mb-1">To</label>
+            <input type="date" id="to" name="to" class="form-control form-control-sm"
+                   th:value="${to}">
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+            <a th:href="@{/admin/audit}" class="btn btn-outline-secondary btn-sm">Reset</a>
+        </div>
+        <div class="col text-end text-muted small">
+            <span th:if="${from == null and to == null and (selectedEventType == null or #strings.isEmpty(selectedEventType))}">
+                Showing the most recent <span th:text="${defaultLimit}">100</span> entries.
+            </span>
+            <span th:text="|Total: ${#lists.size(entries)}|">Total: 0</span>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle">
+            <thead class="table-dark">
+            <tr>
+                <th style="white-space: nowrap;">Timestamp</th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Event</th>
+                <th>Entity</th>
+                <th>Entity ID</th>
+                <th>Before</th>
+                <th>After</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="e : ${entries}">
+                <td style="white-space: nowrap;"
+                    th:text="${#temporals.format(e.timestamp(), 'yyyy-MM-dd HH:mm:ss')}">2026-01-01 00:00:00</td>
+                <td th:text="${e.username()}">username</td>
+                <td><span class="badge bg-secondary" th:text="${e.userRoleAtTime()}">ROLE</span></td>
+                <td><code th:text="${e.eventType()}">EVENT</code></td>
+                <td th:text="${e.affectedEntityType()}">Type</td>
+                <td>
+                    <code class="small text-muted"
+                          th:text="${e.affectedEntityId() != null ? (#strings.length(e.affectedEntityId()) > 12 ? #strings.substring(e.affectedEntityId(), 0, 12) + '…' : e.affectedEntityId()) : ''}"
+                          th:title="${e.affectedEntityId()}">id</code>
+                </td>
+                <td class="small text-muted"
+                    style="max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                    th:text="${e.beforeValue()}"
+                    th:title="${e.beforeValue()}">before</td>
+                <td class="small"
+                    style="max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                    th:text="${e.afterValue()}"
+                    th:title="${e.afterValue()}">after</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(entries)}">
+                <td colspan="8" class="text-center text-muted py-3">No audit entries match this filter.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="mt-3">
+        <a th:href="@{/dashboard}" class="btn btn-link">Back to dashboard</a>
+    </p>
+</main>
+</body>
+</html>

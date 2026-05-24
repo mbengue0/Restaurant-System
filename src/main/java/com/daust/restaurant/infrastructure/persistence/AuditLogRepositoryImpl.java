@@ -7,6 +7,8 @@ import com.daust.restaurant.domain.UserId;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -56,5 +58,14 @@ public class AuditLogRepositoryImpl implements AuditLogRepository {
                 .stream()
                 .map(AuditLogMapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public List<AuditLogEntry> findRecent(int limit) {
+        if (limit <= 0) {
+            return List.of();
+        }
+        var page = PageRequest.of(0, limit, Sort.by("timestamp").descending());
+        return jpaRepository.findAll(page).stream().map(AuditLogMapper::toDomain).toList();
     }
 }

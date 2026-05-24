@@ -24,13 +24,13 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-4 disabled-card">
-            <div class="card h-100 text-muted">
+        <div class="col-md-4" sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/audit}" class="card text-decoration-none h-100">
                 <div class="card-body">
                     <h5 class="card-title">Audit Log</h5>
-                    <p class="card-text">(coming soon)</p>
+                    <p class="card-text text-muted">System event history (UC20).</p>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-md-4"
              sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
