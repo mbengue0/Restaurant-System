@@ -20,7 +20,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            RoleBasedAuthenticationSuccessHandler successHandler) throws Exception {
+            RoleBasedAuthenticationSuccessHandler successHandler,
+            AuditingAuthenticationFailureHandler failureHandler,
+            AuditingLogoutSuccessHandler logoutSuccessHandler) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/css/**", "/js/**", "/webjars/**", "/error")
@@ -36,6 +38,10 @@ public class SecurityConfig {
                         // only (UC15/UC16). More-specific rule first.
                         .requestMatchers("/orders/*/split", "/orders/*/split/**", "/orders/merge")
                         .hasAnyRole("MANAGER", "ADMIN")
+                        // Manual table release is Manager/Admin only (FR8). More-specific rule
+                        // before the broad /tables/** waiter rule below.
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/tables/*/release")
+                        .hasAnyRole("MANAGER", "ADMIN")
                         .requestMatchers("/waiter/**", "/tables/**", "/orders/**")
                         .hasAnyRole("WAITER", "MANAGER", "ADMIN")
                         .requestMatchers("/bills/**", "/payments/**").hasAnyRole("MANAGER", "ADMIN")
@@ -45,11 +51,11 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
                         .successHandler(successHandler)
-                        .failureUrl("/login?error")
+                        .failureHandler(failureHandler)
                         .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutSuccessHandler(logoutSuccessHandler)
                         .permitAll());
         return http.build();
     }

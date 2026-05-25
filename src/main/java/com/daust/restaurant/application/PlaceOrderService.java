@@ -2,6 +2,8 @@ package com.daust.restaurant.application;
 
 import com.daust.restaurant.domain.AuditLogEntry;
 import com.daust.restaurant.domain.AuditLogRepository;
+import com.daust.restaurant.domain.Category;
+import com.daust.restaurant.domain.CategoryRepository;
 import com.daust.restaurant.domain.MenuItem;
 import com.daust.restaurant.domain.MenuItemId;
 import com.daust.restaurant.domain.MenuItemRepository;
@@ -26,6 +28,7 @@ public class PlaceOrderService {
     private final OrderRepository orderRepository;
     private final TableRepository tableRepository;
     private final MenuItemRepository menuItemRepository;
+    private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
 
@@ -33,11 +36,13 @@ public class PlaceOrderService {
             OrderRepository orderRepository,
             TableRepository tableRepository,
             MenuItemRepository menuItemRepository,
+            CategoryRepository categoryRepository,
             UserRepository userRepository,
             AuditLogRepository auditLogRepository) {
         this.orderRepository = orderRepository;
         this.tableRepository = tableRepository;
         this.menuItemRepository = menuItemRepository;
+        this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
         this.auditLogRepository = auditLogRepository;
     }
@@ -75,6 +80,19 @@ public class PlaceOrderService {
         MenuItem menuItem = menuItemRepository
                 .findById(menuItemId)
                 .orElseThrow(() -> new MenuItemNotFoundException("MenuItem not found: " + menuItemId));
+
+        // FR9 / BR2 — cross-aggregate guard: reject items whose Category is inactive.
+        // Order doesn't know about Category, so the check lives here (deferred-guard pattern).
+        Category category = categoryRepository
+                .findById(menuItem.getCategoryId())
+                .orElseThrow(() -> new CategoryNotFoundException(
+                        "Category not found: " + menuItem.getCategoryId()));
+        if (!category.isActive()) {
+            throw new InactiveCategoryException(
+                    "Cannot add item '" + menuItem.getName()
+                            + "' — its category '" + category.getName() + "' is inactive (FR9/BR2).");
+        }
+
         User waiter = loadUser(waiterId);
 
         order.addItem(menuItem, quantity);

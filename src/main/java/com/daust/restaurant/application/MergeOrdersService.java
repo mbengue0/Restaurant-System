@@ -100,6 +100,14 @@ public class MergeOrdersService {
             orders.add(order);
         }
 
+        // BR6: orders linked to different tables cannot be merged.
+        var firstTable = orders.get(0).getTableId();
+        for (Order order : orders) {
+            if (!order.getTableId().equals(firstTable)) {
+                throw new InvalidMergeException("orders must belong to the same table");
+            }
+        }
+
         Map<MenuItemId, String> nameLookup = new HashMap<>();
         for (Order order : orders) {
             for (OrderItem item : order.getItems()) {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('Tables')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: nav}"></nav>
@@ -36,6 +36,12 @@
                     <a th:if="${table.status.name() == 'OCCUPIED'}"
                        th:href="@{/orders/active}"
                        class="btn btn-outline-secondary btn-sm">Active Order</a>
+                    <form th:if="${releasable.contains(table.id.value)}"
+                          sec:authorize="hasAnyRole('MANAGER', 'ADMIN')"
+                          th:action="@{/tables/{id}/release(id=${table.id.value})}" method="post"
+                          class="d-inline">
+                        <button class="btn btn-outline-danger btn-sm" type="submit">Free Table</button>
+                    </form>
 
                     <small class="text-muted d-block mt-2"
                            th:text="${'#' + #strings.substring(table.id.value, 0, 8)}">id</small>

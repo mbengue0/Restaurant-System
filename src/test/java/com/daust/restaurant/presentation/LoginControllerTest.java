@@ -4,6 +4,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.daust.restaurant.infrastructure.security.JpaUserDetailsService;
+import com.daust.restaurant.infrastructure.security.AuditingAuthenticationFailureHandler;
+import com.daust.restaurant.infrastructure.security.AuditingLogoutSuccessHandler;
 import com.daust.restaurant.infrastructure.security.RoleBasedAuthenticationSuccessHandler;
 import com.daust.restaurant.infrastructure.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,8 @@ class LoginControllerTest {
     @Autowired private MockMvc mockMvc;
 
     @MockitoBean private RoleBasedAuthenticationSuccessHandler successHandler;
+    @MockitoBean private AuditingAuthenticationFailureHandler failureHandler;
+    @MockitoBean private AuditingLogoutSuccessHandler logoutSuccessHandler;
     @MockitoBean private JpaUserDetailsService userDetailsService;
 
     @Test

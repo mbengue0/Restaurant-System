@@ -14,6 +14,8 @@ import com.daust.restaurant.application.DailySummary.MethodBreakdown;
 import com.daust.restaurant.application.SalesSummaryService;
 import com.daust.restaurant.domain.PaymentMethod;
 import com.daust.restaurant.infrastructure.security.JpaUserDetailsService;
+import com.daust.restaurant.infrastructure.security.AuditingAuthenticationFailureHandler;
+import com.daust.restaurant.infrastructure.security.AuditingLogoutSuccessHandler;
 import com.daust.restaurant.infrastructure.security.RoleBasedAuthenticationSuccessHandler;
 import com.daust.restaurant.infrastructure.security.SecurityConfig;
 import java.math.BigDecimal;
@@ -37,6 +39,8 @@ class SalesSummaryControllerTest {
     @MockitoBean private SalesSummaryService salesSummaryService;
     @MockitoBean private CurrentUserHelper currentUserHelper;
     @MockitoBean private RoleBasedAuthenticationSuccessHandler successHandler;
+    @MockitoBean private AuditingAuthenticationFailureHandler failureHandler;
+    @MockitoBean private AuditingLogoutSuccessHandler logoutSuccessHandler;
     @MockitoBean private JpaUserDetailsService userDetailsService;
 
     private static DailySummary emptySummary(LocalDate day) {

@@ -9,7 +9,9 @@ import static org.mockito.Mockito.when;
 
 import com.daust.restaurant.domain.AuditLogEntry;
 import com.daust.restaurant.domain.AuditLogRepository;
+import com.daust.restaurant.domain.Category;
 import com.daust.restaurant.domain.CategoryId;
+import com.daust.restaurant.domain.CategoryRepository;
 import com.daust.restaurant.domain.MenuItem;
 import com.daust.restaurant.domain.MenuItemRepository;
 import com.daust.restaurant.domain.Order;
@@ -37,10 +39,19 @@ class PlaceOrderServiceTest {
     @Mock private OrderRepository orderRepository;
     @Mock private TableRepository tableRepository;
     @Mock private MenuItemRepository menuItemRepository;
+    @Mock private CategoryRepository categoryRepository;
     @Mock private UserRepository userRepository;
     @Mock private AuditLogRepository auditLogRepository;
 
     @InjectMocks private PlaceOrderService service;
+
+    private static Category activeCategory(CategoryId id) {
+        return Category.reconstitute(id, "Starters", 1, true);
+    }
+
+    private static Category inactiveCategory(CategoryId id) {
+        return Category.reconstitute(id, "Retired", 1, false);
+    }
 
     @Test
     void startOrder_createsOrderAndAudits_whenTableOccupied() {
@@ -76,10 +87,12 @@ class PlaceOrderServiceTest {
         Table table = new Table(4);
         table.seatCustomers();
         Order order = new Order(table.getId());
-        MenuItem item = new MenuItem("Thieb", null, new BigDecimal("8500"), CategoryId.generate());
+        CategoryId catId = CategoryId.generate();
+        MenuItem item = new MenuItem("Thieb", null, new BigDecimal("8500"), catId);
         User waiter = new User("w", HASH, "W", Role.WAITER, false);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(menuItemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(categoryRepository.findById(catId)).thenReturn(Optional.of(activeCategory(catId)));
         when(userRepository.findById(waiter.getId())).thenReturn(Optional.of(waiter));
 
         service.addItemToOrder(order.getId(), item.getId(), 2, waiter.getId());
@@ -89,6 +102,46 @@ class PlaceOrderServiceTest {
         ArgumentCaptor<AuditLogEntry> captor = ArgumentCaptor.forClass(AuditLogEntry.class);
         verify(auditLogRepository).save(captor.capture());
         assertThat(captor.getValue().getEventType()).isEqualTo("ORDER_ITEM_ADDED");
+    }
+
+    @Test
+    void addItemToOrder_throwsInactiveCategoryException_whenCategoryInactive_FR9() {
+        Table table = new Table(4);
+        table.seatCustomers();
+        Order order = new Order(table.getId());
+        CategoryId catId = CategoryId.generate();
+        // Item itself is active, but its category is not.
+        MenuItem item = new MenuItem("Old Special", null, new BigDecimal("5000"), catId);
+        User waiter = new User("w", HASH, "W", Role.WAITER, false);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(menuItemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(categoryRepository.findById(catId)).thenReturn(Optional.of(inactiveCategory(catId)));
+
+        assertThatThrownBy(() -> service.addItemToOrder(order.getId(), item.getId(), 1, waiter.getId()))
+                .isInstanceOf(InactiveCategoryException.class)
+                .hasMessageContaining("inactive");
+
+        assertThat(order.getItems()).isEmpty();
+        verify(orderRepository, never()).save(any());
+        verify(auditLogRepository, never()).save(any());
+    }
+
+    @Test
+    void addItemToOrder_throwsCategoryNotFound_whenCategoryMissing() {
+        Table table = new Table(4);
+        table.seatCustomers();
+        Order order = new Order(table.getId());
+        CategoryId catId = CategoryId.generate();
+        MenuItem item = new MenuItem("Item", null, new BigDecimal("1000"), catId);
+        var waiterId = com.daust.restaurant.domain.UserId.generate();
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(menuItemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(categoryRepository.findById(catId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.addItemToOrder(order.getId(), item.getId(), 1, waiterId))
+                .isInstanceOf(CategoryNotFoundException.class);
+
+        verify(orderRepository, never()).save(any());
     }
 
     @Test

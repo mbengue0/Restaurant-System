@@ -8,6 +8,8 @@ import com.daust.restaurant.application.ConfigurationService;
 import com.daust.restaurant.domain.Configuration;
 import com.daust.restaurant.domain.PaymentMethod;
 import com.daust.restaurant.infrastructure.security.JpaUserDetailsService;
+import com.daust.restaurant.infrastructure.security.AuditingAuthenticationFailureHandler;
+import com.daust.restaurant.infrastructure.security.AuditingLogoutSuccessHandler;
 import com.daust.restaurant.infrastructure.security.RoleBasedAuthenticationSuccessHandler;
 import com.daust.restaurant.infrastructure.security.SecurityConfig;
 import java.math.BigDecimal;
@@ -30,6 +32,8 @@ class ConfigurationControllerTest {
     @MockitoBean private ConfigurationService configurationService;
     @MockitoBean private CurrentUserHelper currentUserHelper;
     @MockitoBean private RoleBasedAuthenticationSuccessHandler successHandler;
+    @MockitoBean private AuditingAuthenticationFailureHandler failureHandler;
+    @MockitoBean private AuditingLogoutSuccessHandler logoutSuccessHandler;
     @MockitoBean private JpaUserDetailsService userDetailsService;
 
     @Test

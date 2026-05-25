@@ -1,5 +1,7 @@
 package com.daust.restaurant.infrastructure.security;
 
+import com.daust.restaurant.domain.AuditLogEntry;
+import com.daust.restaurant.domain.AuditLogRepository;
 import com.daust.restaurant.domain.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,9 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class RoleBasedAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final UserRepository userRepository;
+    private final AuditLogRepository auditLogRepository;
 
-    public RoleBasedAuthenticationSuccessHandler(UserRepository userRepository) {
+    public RoleBasedAuthenticationSuccessHandler(
+            UserRepository userRepository, AuditLogRepository auditLogRepository) {
         this.userRepository = userRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     @Override
@@ -26,16 +31,25 @@ public class RoleBasedAuthenticationSuccessHandler extends SimpleUrlAuthenticati
     public void onAuthenticationSuccess(
             HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
-        recordLogin(authentication.getName());
+        recordLoginAndAudit(authentication.getName());
         String target = targetForRole(roleOf(authentication));
         getRedirectStrategy().sendRedirect(request, response, target);
     }
 
-    private void recordLogin(String username) {
+    private void recordLoginAndAudit(String username) {
         userRepository.findByUsername(username).ifPresent(user -> {
             if (user.isActive()) {
                 user.recordLogin(Instant.now());
                 userRepository.save(user);
+                // NFR-AUD-1: authentication events are audited.
+                auditLogRepository.save(new AuditLogEntry(
+                        user.getId(),
+                        user.getRole(),
+                        "USER_LOGIN",
+                        "User",
+                        user.getId().value().toString(),
+                        null,
+                        "username=" + user.getUsername()));
             }
         });
     }

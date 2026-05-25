@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.daust.restaurant.application.TableManagementService;
 import com.daust.restaurant.infrastructure.security.JpaUserDetailsService;
+import com.daust.restaurant.infrastructure.security.AuditingAuthenticationFailureHandler;
+import com.daust.restaurant.infrastructure.security.AuditingLogoutSuccessHandler;
 import com.daust.restaurant.infrastructure.security.RoleBasedAuthenticationSuccessHandler;
 import com.daust.restaurant.infrastructure.security.SecurityConfig;
 import java.util.List;
@@ -27,6 +29,8 @@ class TableManagementControllerTest {
     @MockitoBean private TableManagementService tableManagementService;
     @MockitoBean private CurrentUserHelper currentUserHelper;
     @MockitoBean private RoleBasedAuthenticationSuccessHandler successHandler;
+    @MockitoBean private AuditingAuthenticationFailureHandler failureHandler;
+    @MockitoBean private AuditingLogoutSuccessHandler logoutSuccessHandler;
     @MockitoBean private JpaUserDetailsService userDetailsService;
 
     @Test

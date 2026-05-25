@@ -77,7 +77,12 @@ class MergeOrdersServiceTest {
     private static Order servedOrder(MenuItem... items) {
         Table table = new Table(4);
         table.seatCustomers();
-        Order order = new Order(table.getId());
+        return servedOrderAt(table.getId(), items);
+    }
+
+    private static Order servedOrderAt(
+            com.daust.restaurant.domain.TableId tableId, MenuItem... items) {
+        Order order = new Order(tableId);
         for (MenuItem mi : items) {
             order.addItem(mi, 1);
         }
@@ -96,8 +101,9 @@ class MergeOrdersServiceTest {
     void mergeOrders_twoServedOrders_createsOneBill_withCombinedItemsAndBR3Totals() {
         MenuItem pizza = item("Pizza", "1000.00");
         MenuItem soda = item("Soda", "500.00");
-        Order o1 = servedOrder(pizza);
-        Order o2 = servedOrder(soda);
+        var sharedTable = com.daust.restaurant.domain.TableId.generate();
+        Order o1 = servedOrderAt(sharedTable, pizza);
+        Order o2 = servedOrderAt(sharedTable, soda);
         User mgr = manager();
 
         when(configurationRepository.load()).thenReturn(Optional.of(configWithMergeEnabled()));
@@ -136,8 +142,9 @@ class MergeOrdersServiceTest {
     void mergeOrders_writesOrdersMergedAuditEntry() {
         MenuItem pizza = item("Pizza", "1000.00");
         MenuItem soda = item("Soda", "500.00");
-        Order o1 = servedOrder(pizza);
-        Order o2 = servedOrder(soda);
+        var sharedTable = com.daust.restaurant.domain.TableId.generate();
+        Order o1 = servedOrderAt(sharedTable, pizza);
+        Order o2 = servedOrderAt(sharedTable, soda);
         User mgr = manager();
 
         when(configurationRepository.load()).thenReturn(Optional.of(configWithMergeEnabled()));
@@ -165,9 +172,10 @@ class MergeOrdersServiceTest {
         MenuItem a = item("A", "1000.00");
         MenuItem b = item("B", "1000.00");
         MenuItem c = item("C", "1000.00");
-        Order o1 = servedOrder(a);
-        Order o2 = servedOrder(b);
-        Order o3 = servedOrder(c);
+        var sharedTable = com.daust.restaurant.domain.TableId.generate();
+        Order o1 = servedOrderAt(sharedTable, a);
+        Order o2 = servedOrderAt(sharedTable, b);
+        Order o3 = servedOrderAt(sharedTable, c);
         User mgr = manager();
 
         when(configurationRepository.load()).thenReturn(Optional.of(configWithMergeEnabled()));
@@ -274,6 +282,31 @@ class MergeOrdersServiceTest {
                 .isInstanceOf(BillAlreadyGeneratedException.class);
 
         verify(billRepository, never()).save(any());
+    }
+
+    @Test
+    void mergeOrders_throws_whenOrdersBelongToDifferentTables_BR6() {
+        MenuItem pizza = item("Pizza", "1000.00");
+        MenuItem soda = item("Soda", "500.00");
+        // Two distinct tables ⇒ two distinct tableIds via servedOrder
+        Order o1 = servedOrder(pizza);
+        Order o2 = servedOrder(soda);
+        User mgr = manager();
+
+        when(configurationRepository.load()).thenReturn(Optional.of(configWithMergeEnabled()));
+        when(userRepository.findById(mgr.getId())).thenReturn(Optional.of(mgr));
+        when(orderRepository.findById(o1.getId())).thenReturn(Optional.of(o1));
+        when(orderRepository.findById(o2.getId())).thenReturn(Optional.of(o2));
+        when(billRepository.findByOrderId(o1.getId())).thenReturn(List.of());
+        when(billRepository.findByOrderId(o2.getId())).thenReturn(List.of());
+
+        assertThatThrownBy(() -> service.mergeOrders(
+                        List.of(o1.getId(), o2.getId()), mgr.getId()))
+                .isInstanceOf(InvalidMergeException.class)
+                .hasMessageContaining("same table");
+
+        verify(billRepository, never()).save(any());
+        verify(auditLogRepository, never()).save(any());
     }
 
     @Test
