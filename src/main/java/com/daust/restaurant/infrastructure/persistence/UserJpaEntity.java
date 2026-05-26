@@ -15,11 +15,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(
         name = "users",
         uniqueConstraints = @UniqueConstraint(name = "uk_users_username", columnNames = "username"))
+// Set-membership check encoded as a LIKE; see OrderJpaEntity comment.
+@Check(
+        name = "ck_users_role",
+        constraints = "',ADMIN,MANAGER,WAITER,KITCHEN_STAFF,' like '%,' || role || ',%'")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,7 +45,7 @@ class UserJpaEntity {
     private String fullName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 20)
+    @Column(name = "role", nullable = false, length = 20, columnDefinition = "varchar(20)")
     private Role role;
 
     @Column(name = "active", nullable = false)

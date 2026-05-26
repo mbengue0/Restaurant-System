@@ -16,11 +16,20 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(
         name = "payments",
         uniqueConstraints = @UniqueConstraint(name = "uk_payments_bill_id", columnNames = "bill_id"))
+// Set-membership check encoded as a LIKE; see OrderJpaEntity comment.
+@Check(
+        name = "ck_payments_method",
+        constraints = "',CASH,CARD,MOBILE_MONEY,' like '%,' || method || ',%'")
+@Check(name = "ck_payments_amount_due_nonneg", constraints = "amount_due >= 0")
+@Check(name = "ck_payments_amount_paid_nonneg", constraints = "amount_paid >= 0")
+@Check(name = "ck_payments_change_due_nonneg", constraints = "change_due >= 0")
+@Check(name = "ck_payments_paid_ge_due", constraints = "amount_paid >= amount_due")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -41,7 +50,7 @@ class PaymentJpaEntity {
     private BigDecimal amountPaid;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "method", nullable = false, length = 20)
+    @Column(name = "method", nullable = false, length = 20, columnDefinition = "varchar(20)")
     private PaymentMethod method;
 
     @Column(name = "reference", length = 100)

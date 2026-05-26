@@ -23,11 +23,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(
         name = "bills",
         uniqueConstraints = @UniqueConstraint(name = "uk_bills_bill_number", columnNames = "bill_number"))
+@Check(name = "ck_bills_items_subtotal_nonneg", constraints = "items_subtotal >= 0")
+@Check(name = "ck_bills_tax_amount_nonneg", constraints = "tax_amount >= 0")
+@Check(name = "ck_bills_service_charge_nonneg", constraints = "service_charge_amount >= 0")
+@Check(name = "ck_bills_cover_charge_nonneg", constraints = "cover_charge_amount >= 0")
+@Check(name = "ck_bills_total_nonneg", constraints = "total >= 0")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

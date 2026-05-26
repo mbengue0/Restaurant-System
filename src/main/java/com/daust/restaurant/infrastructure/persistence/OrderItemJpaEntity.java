@@ -11,9 +11,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(name = "order_items")
+@Check(name = "ck_order_items_quantity_positive", constraints = "quantity >= 1")
+@Check(name = "ck_order_items_unit_price_nonneg", constraints = "recorded_unit_price >= 0")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

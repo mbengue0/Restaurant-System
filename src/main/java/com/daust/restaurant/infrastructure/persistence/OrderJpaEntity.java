@@ -21,9 +21,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(name = "orders")
+// Set-membership check encoded as a LIKE over a concatenated sentinel string.
+// Equivalent to: state IN ('PLACED','IN_PREPARATION','READY','SERVED','COMPLETED','CANCELLED').
+// Written this way because H2 2.4.x mis-parses CHECK ... IN (...) on string columns;
+// LIKE/|| is portable to PostgreSQL and gives the same set-membership guarantee.
+@Check(
+        name = "ck_orders_state",
+        constraints =
+                "',PLACED,IN_PREPARATION,READY,SERVED,COMPLETED,CANCELLED,'"
+                        + " like '%,' || state || ',%'")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,7 +48,7 @@ class OrderJpaEntity {
     private UUID tableId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "state", nullable = false, length = 20)
+    @Column(name = "state", nullable = false, length = 20, columnDefinition = "varchar(20)")
     private OrderState state;
 
     @Column(name = "placed_at", nullable = false)
@@ -57,7 +67,7 @@ class OrderJpaEntity {
     private LocalDateTime cancelledAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "cancellation_reason", length = 30)
+    @Column(name = "cancellation_reason", length = 30, columnDefinition = "varchar(30)")
     private CancellationReason cancellationReason;
 
     @Column(name = "cancellation_note", columnDefinition = "TEXT")

@@ -17,7 +17,12 @@ import org.hibernate.annotations.Check;
 
 @Entity
 @Table(name = "configuration")
-@Check(constraints = "id = 1")
+@Check(name = "ck_configuration_singleton", constraints = "id = 1")
+@Check(name = "ck_configuration_tax_rate_range", constraints = "tax_rate >= 0 AND tax_rate <= 1")
+@Check(
+        name = "ck_configuration_service_rate_range",
+        constraints = "service_charge_rate >= 0 AND service_charge_rate <= 1")
+@Check(name = "ck_configuration_cover_nonneg", constraints = "cover_charge_amount >= 0")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
